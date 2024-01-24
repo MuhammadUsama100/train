@@ -1,41 +1,45 @@
 # train.py
-
 import mlflow
 import mlflow.pytorch
 import torch
 import torch.nn as nn
-import torchvision.transforms as transforms
-from torchvision.models import resnet18
-from torch.utils.data import DataLoader
+import torch.optim as optim
 
-# Define a simple neural network
+# Define a simple model
 class SimpleModel(nn.Module):
-    def __init__(self, num_classes=10):
+    def __init__(self):
         super(SimpleModel, self).__init__()
-        self.resnet = resnet18(pretrained=False)
-        in_features = self.resnet.fc.in_features
-        self.resnet.fc = nn.Linear(in_features, num_classes)
+        self.fc = nn.Linear(1, 1)
 
     def forward(self, x):
-        return self.resnet(x)
+        return self.fc(x)
 
-# Function to train the model
-def train_model():
+def train():
     # Your training logic here
-
-    # Example: Training a simple model
     model = SimpleModel()
-    criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    criterion = nn.MSELoss()
+    optimizer = optim.SGD(model.parameters(), lr=0.01)
 
-    # Your training loop here
+    # Simulated training loop
+    for epoch in range(10):
+        x = torch.rand(10, 1)
+        y_true = 2 * x + 1
 
-    # Example: Saving the model
-    torch.save(model.state_dict(), "model.pth")
+        optimizer.zero_grad()
+        y_pred = model(x)
+        loss = criterion(y_pred, y_true)
+        loss.backward()
+        optimizer.step()
 
-    # Log the model to MLflow
+        # Log metrics and parameters to MLflow
+        mlflow.log_param("epoch", epoch)
+        mlflow.log_metric("loss", loss.item())
+
+    # Save the trained model
     mlflow.pytorch.log_model(model, "model")
 
 if __name__ == "__main__":
-    train_model()
+    # Start an MLflow run
+    with mlflow.start_run():
+        train()
 

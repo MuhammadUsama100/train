@@ -1,0 +1,9 @@
+# conda.yaml
+name: mlflow-basic-example
+channels:
+  - defaults
+dependencies:
+  - python=3.8
+  - pytorch
+  - torchvision
+  - mlflow
